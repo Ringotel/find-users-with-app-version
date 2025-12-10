@@ -4,3 +4,14 @@ This Nodejs app retrieves data from all users in all organizations under a Ringo
 
 ![find-users-with-app-version](https://github.com/user-attachments/assets/fa37c456-0df6-49f4-b087-c43a8488e6fc)
 
+# Example
+
+```bash
+APP_VERSION="5.5.09.04" API_KEY=<your-api-key> node index.js
+```
+
+or 
+
+```bash
+APP_VERSION="Windows|Mac|Linux" API_KEY=<your-api-key> node index.js
+```
