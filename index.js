@@ -2,7 +2,7 @@
 
 // --- Configuration ---
 const RINGOTEL_BASE_URL = 'https://shell.ringotel.co/api';
-const API_KEY = process.env.API_KEY  || 'YOUR_RINGOTEL_API_KEY';
+const API_KEY = process.env.API_KEY || 'YOUR_RINGOTEL_API_KEY';
 
 // UPDATE WITH YOUR OWN PARAMETERS BEFORE RUNNING THE SCRIPT
 const APP_VERSION = process.env.APP_VERSION || "5.5.09.04"; // Example: "5.5.09.04"
@@ -29,7 +29,7 @@ async function fetchData(url, options) {
             console.error(`Details: ${typeof errorBody === 'string' ? errorBody : JSON.stringify(errorBody, null, 2)}`);
             return null;
         }
-        
+
         return await response.json();
     } catch (error) {
         console.error(`Network error during fetch to ${url}:`, error.message);
@@ -97,7 +97,7 @@ async function getUsersInOrganisation(orgid) {
  * Main function to find users with the specified app version.
  */
 async function findUsersByAppVersion() {
-    if(!API_KEY || !APP_VERSION) {
+    if (!API_KEY || !APP_VERSION) {
         console.error('API_KEY and APP_VERSION must be set.');
         return;
     }
@@ -117,7 +117,8 @@ async function findUsersByAppVersion() {
         for (const user of users) {
             if (user.devs) {
                 for (const dev of user.devs) {
-                    if (dev.ua && dev.ua.indexOf(APP_VERSION) !== -1) {
+                    // Check if the user is using the specified app version
+                    if (dev.ua && dev.ua.match(APP_VERSION)) {
 
                         usersWithAppVersion.push({
                             orgDomain,
