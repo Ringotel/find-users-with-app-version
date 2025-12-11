@@ -1,9 +1,10 @@
+import fs from 'fs'
 // Fetch all users in all organisations and return users with their organisation domain and IDs who are using a specific app version.
 
 // --- Configuration ---
 const RINGOTEL_BASE_URL = 'https://shell.ringotel.co/api';
 const API_KEY = process.env.API_KEY || 'YOUR_RINGOTEL_API_KEY';
-
+const LIMIT = process.env.LIMIT || null;
 // UPDATE WITH YOUR OWN PARAMETERS BEFORE RUNNING THE SCRIPT
 const APP_VERSION = process.env.APP_VERSION || "5.5.09.04"; // Example: "5.5.09.04"
 
@@ -83,10 +84,8 @@ async function getUsersInOrganisation(orgid) {
             }
         })
     };
-    console.log(`Fetching users for organisation ID: ${orgid}...`);
     const response = await fetchData(RINGOTEL_BASE_URL, options);
     if (response && response.result) {
-        console.log(`Found ${response.result.length} users in organisation ID: ${orgid}.`);
         return response.result;
     }
     console.error(`Could not retrieve users for organisation ID: ${orgid}.`);
@@ -110,10 +109,12 @@ async function findUsersByAppVersion() {
     }
     const usersWithAppVersion = [];
 
-    for (const org of organisations) {
-        const orgId = org.id;
-        const orgDomain = org.domain || 'N/A';
+    for (let i = 0; i < organisations.length; i++) {
+        const orgId = organisations[i].id;
+        const orgDomain = organisations[i].domain || 'N/A';
+        console.log(`${i + 1}: Fetching users for organisation ID: ${orgId}...`);
         const users = await getUsersInOrganisation(orgId);
+        console.log(`Found ${users.length} users in organisation ID: ${orgId}.`);
         for (const user of users) {
             if (user.devs) {
                 for (const dev of user.devs) {
@@ -134,11 +135,19 @@ async function findUsersByAppVersion() {
                 }
             }
         }
+        if (LIMIT && i >= LIMIT - 1) {
+            break;
+        }
     }
 
     if (usersWithAppVersion.length > 0) {
         console.log(`Users with app version ${APP_VERSION}:`);
-        console.table(usersWithAppVersion);
+        // console.table(usersWithAppVersion);
+        // Write into a CSV file
+        const csv = usersWithAppVersion.map(user => Object.values(user)).join('\n');
+        // Add headers row
+        const headers = Object.keys(usersWithAppVersion[0]).join(',');
+        fs.writeFileSync('users_with_app_version.csv', headers + '\n' + csv);
     } else {
         console.log(`No users found with app version ${APP_VERSION}.`);
     }
